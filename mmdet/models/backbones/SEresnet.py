@@ -332,8 +332,9 @@ class Bottleneck(nn.Module):
                 out = self.forward_plugin(out, self.after_conv2_plugin_names)
 
             out = self.conv3(out)
-            out = self.norm3(out)
             out = self.se(out)
+            out = self.norm3(out)
+           
 
             if self.with_plugins:
                 out = self.forward_plugin(out, self.after_conv3_plugin_names)
