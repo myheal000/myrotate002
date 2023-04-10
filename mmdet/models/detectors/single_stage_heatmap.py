@@ -135,7 +135,7 @@ class SingleStageDetectorHp(BaseDetector):
         draw_feature_map1(x,imgpath,name='inputs_') #特征层，图片路径，保存的文件名
         #feature_map_channel(x,imgpath,name='chanel_')
         if self.with_neck:
-            x = self.neck(x,imgpath)
+            x = self.neck(x)
         return x
 
     def forward_dummy(self, img):
