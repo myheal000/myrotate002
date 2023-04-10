@@ -131,6 +131,7 @@ class SingleStageDetectorHp(BaseDetector):
     def extract_feat(self, img,img_metas):
         """Directly extract features from the backbone+neck."""
         imgpath = img_metas[0]['filename']  # 主要是要图片的原始路径 
+        print(imgpath)
         x = self.backbone(img)
         draw_feature_map1(x,imgpath,name='inputs_') #特征层，图片路径，保存的文件名
         #feature_map_channel(x,imgpath,name='chanel_')

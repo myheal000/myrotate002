@@ -1,7 +1,7 @@
 from ..builder import DETECTORS
 #from .single_stage import SingleStageDetector
-#from .single_stage_heatmap import SingleStageDetectorHp
-from .mysingle_stage_heatmap import SingleStageDetectorhp
+from .single_stage_heatmap import SingleStageDetectorHp
+#from .mysingle_stage_heatmap import SingleStageDetectorhp
 
 
 @DETECTORS.register_module()
@@ -16,7 +16,7 @@ from .mysingle_stage_heatmap import SingleStageDetectorhp
           #       pretrained=None):
           #super(ATSS, self).__init__(backbone, neck, bbox_head, train_cfg,
          #                          test_cfg, pretrained)
-class ATSS(SingleStageDetectorhp):
+class ATSS(SingleStageDetectorHp):
 
     def __init__(self,
                  backbone,

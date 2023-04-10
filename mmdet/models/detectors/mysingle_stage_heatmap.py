@@ -26,7 +26,7 @@ def featuremap_2_heatmap(feature_map):
 
     return heatmaps
 
-def draw_feature_map(features,save_dir = 'feature_map',name = None):
+def draw_feature_map(features,save_dir = './work_dirs/feature_map/',name = None):
     i=0
     if isinstance(features,torch.Tensor):
         for heat_maps in features:
