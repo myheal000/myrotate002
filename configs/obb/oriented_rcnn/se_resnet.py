@@ -1,6 +1,6 @@
 _base_ = [
     '../_base_/datasets/hrsc.py',
-    '../_base_/schedules/schedule_3x.py',
+    '../_base_/schedules/schedule_8x.py',
     '../../_base_/default_runtime.py'
 ]
 checkpoint_config = dict(interval=6)

@@ -54,7 +54,7 @@ test_pipeline = [
 
 # does evaluation while training
 # uncomments it  when you need evaluate every epoch
-""" data = dict(
+data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
     train=dict(
@@ -72,14 +72,14 @@ test_pipeline = [
     test=dict(
         type=dataset_type,
         task='Task1',
-        ann_file=data_root + 'val/annfiles/',
-        img_prefix=data_root + 'val/images/',
+        ann_file=data_root + 'test/annfiles/',
+        img_prefix=data_root + 'test/images/',
         pipeline=test_pipeline))
 evaluation = dict(interval=2,metric='mAP')
- """
+ 
 # disable evluation, only need train and test
 # uncomments it when use trainval as train
-data = dict(
+""" data = dict(
     samples_per_gpu=2,
     workers_per_gpu=4,
     train=dict(
@@ -95,3 +95,4 @@ data = dict(
         img_prefix=data_root + 'test/images/',
         pipeline=test_pipeline))
 evaluation = dict(interval=1, metric='mAP') 
+ """

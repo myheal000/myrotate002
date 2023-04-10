@@ -1,4 +1,4 @@
-_base_ = './faster_rcnn_orpn_r50_fpn_3x_hrsc.py'
+_base_ = './faster_rcnn_orpn_r50_fpn_1x_dota10.py'
 model = dict(
     neck=
         dict(type='MSFPN',
