@@ -19,6 +19,7 @@ from .rpn import RPN
 from .single_stage import SingleStageDetector
 from .two_stage import TwoStageDetector
 from .single_stage_heatmap import SingleStageDetectorHp
+from .mysingle_stage_heatmap import SingleStageDetectorhp
 
 from .obb.obb_base import OBBBaseDetector
 from .obb.obb_two_stage import OBBTwoStageDetector
@@ -38,6 +39,7 @@ __all__ = [
     'FastRCNN', 'FasterRCNN', 'MaskRCNN', 'CascadeRCNN', 'HybridTaskCascade',
     'RetinaNet', 'FCOS', 'GridRCNN', 'MaskScoringRCNN', 'RepPointsDetector',
     'FOVEA', 'FSAF', 'NASFCOS', 'PointRend', 'GFL', 'SingleStageDetectorHp',
+    'SingleStageDetectorhp',
 
     'OBBBaseDetector', 'OBBTwoStageDetector', 'OBBSingleStageDetector',
     'FasterRCNNOBB', 'RetinaNetOBB', 'RoITransformer'
