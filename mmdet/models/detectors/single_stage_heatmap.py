@@ -26,9 +26,9 @@ def draw_feature_map1(features, img_path, save_dir = './work_dirs/feature_map/',
         heatmap0 = np.uint8(255 * heatmap)  # 将热力图转换为RGB格式,0-255,heatmap0显示红色为关注区域，如果用heatmap则蓝色是关注区域
         heatmap = cv2.applyColorMap(heatmap0, cv2.COLORMAP_JET)  # 将热力图应用于原始图像
         superimposed_img = heatmap * 0.4 + img  # 这里的0.4是热力图强度因子
-        plt.imshow(heatmap0)  # ,cmap='gray' ，这里展示下可视化的像素值
+        #plt.imshow(heatmap0)  # ,cmap='gray' ，这里展示下可视化的像素值
         # plt.imshow(superimposed_img)  # ,cmap='gray'
-        plt.close()	#关掉展示的图片
+        #plt.close()	#关掉展示的图片
         # 下面是用opencv查看图片的
         # cv2.imshow("1",superimposed_img)
         # cv2.waitKey(0)     #这里通过安键盘取消显示继续运行。
@@ -132,8 +132,10 @@ class SingleStageDetectorHp(BaseDetector):
         """Directly extract features from the backbone+neck."""
         imgpath = img_metas[0]['filename']  # 主要是要图片的原始路径 
         print(imgpath)
+        filename = imgpath.split('/')[-1]
+        imgname = filename.split('.')[0]
         x = self.backbone(img)
-        draw_feature_map1(x,imgpath,name='inputs_') #特征层，图片路径，保存的文件名
+        draw_feature_map1(x,imgpath,name=imgname) #特征层，图片路径，保存的文件名
         #feature_map_channel(x,imgpath,name='chanel_')
         if self.with_neck:
             x = self.neck(x)

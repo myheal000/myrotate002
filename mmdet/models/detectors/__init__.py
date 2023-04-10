@@ -32,6 +32,7 @@ from .obb.obb_rpn import OBBRPN
 from .obb.oriented_rcnn import OrientedRCNN
 from .obb.fcos_obb import FCOSOBB
 from .obb.s2anet import S2ANet
+from .obb.obb_two_stageheat import OBBTwoStageDetectorHp
  
 
 __all__ = [
@@ -42,5 +43,5 @@ __all__ = [
     'SingleStageDetectorhp',
 
     'OBBBaseDetector', 'OBBTwoStageDetector', 'OBBSingleStageDetector',
-    'FasterRCNNOBB', 'RetinaNetOBB', 'RoITransformer'
+    'FasterRCNNOBB', 'RetinaNetOBB', 'RoITransformer','OBBTwoStageDetectorHp',
 ]
