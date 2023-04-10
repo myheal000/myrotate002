@@ -133,7 +133,7 @@ class SingleStageDetectorHp(BaseDetector):
         imgpath = img_metas[0]['filename']  # 主要是要图片的原始路径 
         x = self.backbone(img)
         draw_feature_map1(x,imgpath,name='inputs_') #特征层，图片路径，保存的文件名
-        feature_map_channel(x,imgpath,name='chanel_')
+        #feature_map_channel(x,imgpath,name='chanel_')
         if self.with_neck:
             x = self.neck(x,imgpath)
         return x
@@ -189,7 +189,7 @@ class SingleStageDetectorHp(BaseDetector):
         Returns:
             np.ndarray: proposals
         """
-        x = self.extract_feat(img)
+        x = self.extract_feat(img,img_metas)
         outs = self.bbox_head(x)
         bbox_list = self.bbox_head.get_bboxes(
             *outs, img_metas, rescale=rescale)
