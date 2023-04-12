@@ -80,7 +80,7 @@ def feature_map_channel(features,img_path,save_dir = 'work_dirs/feature_map',nam
             # plt.close()
             cv2.imwrite(os.path.join(save_dir, name + str(j)+str(i) + '.png'), superimposed_img)
 
-@DETECTORS.register_module()
+
 
 @DETECTORS.register_module()
 class OBBTwoStageDetectorHp(OBBBaseDetector, RotateAugRPNTestMixin):
@@ -163,13 +163,13 @@ class OBBTwoStageDetectorHp(OBBBaseDetector, RotateAugRPNTestMixin):
     def extract_feat(self, img,img_metas):
         """Directly extract features from the backbone+neck."""
         imgpath = img_metas[0]['filename']  # 主要是要图片的原始路径 
-        #print(imgpath)
+        filename = imgpath.split('/')[-1]
+        imgname = filename.split('.')[0]
         x = self.backbone(img)
-        draw_feature_map1(x,imgpath,name='inputs_') #特征层，图片路径，保存的文件名
+        draw_feature_map1(x,imgpath,name=imgname) #特征层，图片路径，保存的文件名
         #feature_map_channel(x,imgpath,name='chanel_')
         if self.with_neck:
             x = self.neck(x)
-            #draw_feature_map1(x,imgpath,name='inputs_')
         return x
 
     def forward_dummy(self, img):
@@ -237,7 +237,8 @@ class OBBTwoStageDetectorHp(OBBBaseDetector, RotateAugRPNTestMixin):
         Returns:
             dict[str, Tensor]: a dictionary of loss components
         """
-        x = self.extract_feat(img)
+        super( OBBTwoStageDetectorHp, self).forward_train(img, img_metas)
+        x = self.extract_feat(img, img_metas)
 
         losses = dict()
 
