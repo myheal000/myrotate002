@@ -1,5 +1,4 @@
 e2cnn
-mmcv
 mmdet
 torch
 torchvision
