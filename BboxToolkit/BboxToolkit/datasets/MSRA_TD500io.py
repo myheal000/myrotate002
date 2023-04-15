@@ -3,9 +3,10 @@ import time
 import numpy as np
 import os.path as osp
 
+from PIL import Image
 from functools import partial
-from .misc import img_exts, prog_map
-from ..imagesize import imsize
+from multiprocessing import Pool
+from .misc import img_exts
 
 
 def load_msra_td500(img_dir, ann_dir=None, classes=None, nproc=10):
@@ -21,7 +22,12 @@ def load_msra_td500(img_dir, ann_dir=None, classes=None, nproc=10):
 
     print('Starting loading MSRA_TD500 dataset information.')
     start_time = time.time()
-    contents = prog_map(_load_func, imgpaths, nproc)
+    if nproc > 1:
+        pool = Pool(nproc)
+        contents = pool.map(_load_func, imgpaths)
+        pool.close()
+    else:
+        contents = list(map(_load_func, imgpaths))
     end_time = time.time()
     print(f'Finishing loading MSRA_TD500, get {len(contents)} images, ',
           f'using {end_time-start_time:.3f}s.')
@@ -34,7 +40,7 @@ def _load_msra_td500_single(imgfile, img_dir, ann_dir):
     content = _load_msra_td500_gt(gtfile)
 
     imgfile = osp.join(img_dir, imgfile)
-    width, height = imsize(imgfile)
+    width, height = Image.open(imgfile).size
     content.update(dict(width=width, height=height, filename=imgfile, id=img_id))
     return content
 

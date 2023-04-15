@@ -1,149 +1,175 @@
-# OBBDetection
+<div align="center">
+  <img src="resources/mmrotate-logo.png" width="450"/>
+  <div>&nbsp;</div>
+  <div align="center">
+    <b><font size="5">OpenMMLab website</font></b>
+    <sup>
+      <a href="https://openmmlab.com">
+        <i><font size="4">HOT</font></i>
+      </a>
+    </sup>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <b><font size="5">OpenMMLab platform</font></b>
+    <sup>
+      <a href="https://platform.openmmlab.com">
+        <i><font size="4">TRY IT OUT</font></i>
+      </a>
+    </sup>
+  </div>
+  <div>&nbsp;</div>
 
-**note**: If you have questions or good suggestions, feel free to propose issues and contact me.
+[![Documentation](https://readthedocs.org/projects/mmrotate/badge/?version=latest)](https://mmrotate.readthedocs.io/en/latest/?badge=latest)
+[![actions](https://github.com/open-mmlab/mmrotate/workflows/build/badge.svg)](https://github.com/open-mmlab/mmrotate/actions)
+[![codecov](https://codecov.io/gh/open-mmlab/mmrotate/branch/master/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmrotate)
+[![PyPI](https://img.shields.io/pypi/v/mmrotate)](https://pypi.org/project/mmrotate/)
+[![LICENSE](https://img.shields.io/github/license/open-mmlab/mmrotate.svg)](https://github.com/open-mmlab/mmrotate/blob/master/LICENSE)
+[![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/open-mmlab/mmrotate.svg)](https://github.com/open-mmlab/mmrotate/issues)
+[![Percentage of issues still open](https://isitmaintained.com/badge/open/open-mmlab/mmrotate.svg)](https://github.com/open-mmlab/mmrotate/issues)
 
-## introduction
+[📘Documentation](https://mmrotate.readthedocs.io/en/latest/) |
+[🛠️Installation](https://mmrotate.readthedocs.io/en/latest/install.html) |
+[👀Model Zoo](docs/en/model_zoo.md) |
+[🤔Reporting Issues](https://github.com/open-mmlab/mmrotate/issues/new/choose)
+</div>
 
-OBBDetection is an oriented object detection toolbox modified from [MMdetection v2.2](https://github.com/open-mmlab/mmdetection).
+## Introduction
 
-![demo image](demo/obbdet_show.jpg)
+English | [简体中文](README_zh-CN.md)
 
-### Major features
+MMRotate is an open-source toolbox for rotated object detection based on PyTorch.
+It is a part of the [OpenMMLab project](https://github.com/open-mmlab).
 
-- **MMdetection feature inheritance**
+The master branch works with **PyTorch 1.6+**.
 
-  OBBDetection doesn't change the structure and codes of original MMdetection and the additive codes are under MMdetection logic. Therefore, our OBBDetection inherits all features from MMdetection.
+https://user-images.githubusercontent.com/10410257/154433305-416d129b-60c8-44c7-9ebb-5ba106d3e9d5.MP4
 
-- **Support of multiple frameworks out of box**
 
-  We implement multiple oriented object detectors in this toolbox (*e.g.* RoI Transformer, Gliding Vertex). Attributing to moudlar design of MMdetection, Many parts of detectors (*e.g.* backbone, RPN, sampler and assigner) have multiple options.
+<details open>
+<summary><b>Major Features</b></summary>
 
-- **Flexible representation of oriented boxes**
+* **Support multiple angle representations**
 
-  Horizontal bounding boxes (HBB), oriented bounding boxes (OBB) and 4 point boxes (POLY) are supported in this toolbox. The program will confirm the type of bounding box by the tensor shape or the default setting.
+  MMRotate provides three mainstream angle representations to meet different paper settings.
 
-We develop [BboxToolkit](https://github.com/jbwang1997/BboxToolkit) to support oriented bounding boxes operations, which is heavily depended on by this toolbox.
+* **Modular Design**
+
+  We decompose the rotated object detection framework into different components,
+  which makes it much easy and flexible to build a new model by combining different modules.
+
+* **Strong baseline and State of the art**
+
+  The toolbox provides strong baselines and state-of-the-art methods in rotated object detection.
+
+</details>
+
+## Changelog
+
+**0.2.0** was released in 30/3/2022:
+
+- Support Circular Smooth Label (CSL, ECCV'20) (#153)
+- Add [browse_dataset](tools/misc/browse_dataset.py) tool (#98)
+
+Please refer to [changelog.md](docs/en/changelog.md) for details and release history.
+
+## Installation
+
+Please refer to [install.md](docs/en/install.md) for installation guide.
+
+## Get Started
+
+Please see [get_started.md](docs/en/get_started.md) for the basic usage of MMRotate.
+We provide [colab tutorial](demo/MMRotate_Tutorial.ipynb) for beginners.
+There are also tutorials:
+
+* [learn the basics](docs/en/intro.md)
+* [learn the config](docs/en/tutorials/customize_config.md)
+* [customize dataset](docs/en/tutorials/customize_dataset.md)
+* [customize model](docs/en/tutorials/customize_models.md)
+
+
+## Model Zoo
+
+Results and models are available in the *README.md* of each method's config directory.
+A summary can be found in the [Model Zoo](docs/en/model_zoo.md) page.
+
+<details open>
+<summary><b>Supported algorithms:</b></summary>
+
+* [x] [Rotated RetinaNet-OBB/HBB](configs/rotated_retinanet/README.md) (ICCV'2017)
+* [x] [Rotated FasterRCNN-OBB](configs/rotated_faster_rcnn/README.md) (TPAMI'2017)
+* [x] [Rotated RepPoints-OBB](configs/rotated_reppoints/README.md) (ICCV'2019)
+* [x] [RoI Transformer](configs/roi_trans/README.md) (CVPR'2019)
+* [x] [Gliding Vertex](configs/gliding_vertex/README.md) (TPAMI'2020)
+* [x] [CSL](configs/csl/README.md) (ECCV'2020)
+* [x] [R<sup>3</sup>Det](configs/r3det/README.md) (AAAI'2021)
+* [x] [S<sup>2</sup>A-Net](configs/s2anet/README.md) (TGRS'2021)
+* [x] [ReDet](configs/redet/README.md) (CVPR'2021)
+* [x] [Beyond Bounding-Box](configs/cfa/README.md) (CVPR'2021)
+* [x] [Oriented R-CNN](configs/oriented_rcnn/README.md) (ICCV'2021)
+* [x] [GWD](configs/gwd/README.md) (ICML'2021)
+* [x] [KLD](configs/kld/README.md) (NeurIPS'2021)
+* [x] [SASM](configs/sasm_reppoints/README.md) (AAAI'2022)
+* [x] [KFIoU](configs/kfiou/README.md) (arXiv)
+* [x] [G-Rep](configs/g_reppoints/README.md) (stay tuned)
+
+</details>
+
+### Model Request
+
+We will keep up with the latest progress of the community, and support more popular algorithms and frameworks. If you have any feature requests, please feel free to leave a comment in [MMRotate Roadmap](https://github.com/open-mmlab/mmrotate/issues/1).
+
+## Data Preparation
+
+Please refer to [data_preparation.md](tools/data/README.md) to prepare the data.
+
+## FAQ
+
+Please refer to [FAQ](docs/en/faq.md) for frequently asked questions.
+
+## Contributing
+
+We appreciate all contributions to improve MMRotate. Please refer to [CONTRIBUTING.md](.github/CONTRIBUTING.md) for the contributing guideline.
+
+## Acknowledgement
+
+MMRotate is an open source project that is contributed by researchers and engineers from various colleges and companies. We appreciate all the contributors who implement their methods or add new features, as well as users who give valuable feedbacks. We wish that the toolbox and benchmark could serve the growing research community by providing a flexible toolkit to reimplement existing methods and develop their own new methods.
+
+## Citation
+
+If you find this project useful in your research, please consider cite:
+
+```bibtex
+@misc{mmrotate2022,
+  title={MMRotate: A Rotated Object Detection Benchmark using PyTorch},
+  author =       {Zhou, Yue and Yang, Xue and Zhang, Gefan and Jiang, Xue and Liu, Xingzhao and Yan, Junchi and Lyu, Chengqi and Zhang, Wenwei, and Chen, Kai},
+  howpublished = {\url{https://github.com/open-mmlab/mmrotate}},
+  year =         {2022}
+}
+```
 
 ## License
 
 This project is released under the [Apache 2.0 license](LICENSE).
 
-## Update
+## Projects in OpenMMLab
 
-- (**2022-03-15**) Support oriented mask. Open source [Oriented R-CNN and Beyond](configs/obb/oriented_rcnn_beyond).
-- (**2021-12-14**) Thanks [liuyanyi](https://github.com/liuyanyi) for reimplementing [S2ANet](configs/obb/s2anet) in OBBDetection.
-- (**2021-11-29**) Discard mmcv-0.6.2 and support mmcv-full.
-- (**2021-09-18**) Implement [Double Head OBB](configs/obb/double_heads_obb) in the OBBDetection.
-- (**2021-09-01**) Implement [FCOS OBB](configs/obb/fcos_obb) in the OBBDetection.
-- (**2021-08-21**) Reimplement the [PolyIoULoss](configs/obb/poly_iou_loss).
-
-## Benchmark and model zoo
-
-Results and models are available in the [model zoo](docs/model_zoo.md).
-
-Supported backbones:
-- [x] ResNet
-- [x] ResNeXt
-- [x] VGG
-- [x] HRNet
-- [x] RegNet
-- [x] Res2Net
-
-Supported oriented detection methods:
-- [x] [S2ANet (TGRS)](configs/obb/s2anet)
-- [x] [Oriented R-CNN (ICCV'2021)](configs/obb/oriented_rcnn)
-- [x] [Oriented R-CNN and Beyond](configs/obb/oriented_rcnn_beyond)
-- [x] [Poly IoU Loss](configs/obb/poly_iou_loss)
-- [x] [Faster R-CNN OBB](configs/obb/faster_rcnn_obb)
-- [x] [Double Head OBB](configs/obb/double_heads_obb)
-- [x] [RetinaNet OBB](configs/obb/retinanet_obb)
-- [x] [Gliding Vertex](configs/obb/gliding_vertex)
-- [x] [RoI Transformer](configs/obb/roi_transformer)
-- [x] [FCOS OBB](configs/obb/fcos_obb)
-
-Supported horizontal detection methods:
-- [x] [RPN](configs/rpn)
-- [x] [Fast R-CNN](configs/fast_rcnn)
-- [x] [Faster R-CNN](configs/faster_rcnn)
-- [x] [Mask R-CNN](configs/mask_rcnn)
-- [x] [Cascade R-CNN](configs/cascade_rcnn)
-- [x] [Cascade Mask R-CNN](configs/cascade_rcnn)
-- [x] [SSD](configs/ssd)
-- [x] [RetinaNet](configs/retinanet)
-- [x] [GHM](configs/ghm)
-- [x] [Mask Scoring R-CNN](configs/ms_rcnn)
-- [x] [Double-Head R-CNN](configs/double_heads)
-- [x] [Hybrid Task Cascade](configs/htc)
-- [x] [Libra R-CNN](configs/libra_rcnn)
-- [x] [Guided Anchoring](configs/guided_anchoring)
-- [x] [FCOS](configs/fcos)
-- [x] [RepPoints](configs/reppoints)
-- [x] [Foveabox](configs/foveabox)
-- [x] [FreeAnchor](configs/free_anchor)
-- [x] [NAS-FPN](configs/nas_fpn)
-- [x] [ATSS](configs/atss)
-- [x] [FSAF](configs/fsaf)
-- [x] [PAFPN](configs/pafpn)
-- [x] [Dynamic R-CNN](configs/dynamic_rcnn)
-- [x] [PointRend](configs/point_rend)
-- [x] [CARAFE](configs/carafe/README.md)
-- [x] [DCNv2](configs/dcn/README.md)
-- [x] [Group Normalization](configs/gn/README.md)
-- [x] [Weight Standardization](configs/gn+ws/README.md)
-- [x] [OHEM](configs/faster_rcnn/faster_rcnn_r50_fpn_ohem_1x_coco.py)
-- [x] [Soft-NMS](configs/faster_rcnn/faster_rcnn_r50_fpn_soft_nms_1x_coco.py)
-- [x] [Generalized Attention](configs/empirical_attention/README.md)
-- [x] [GCNet](configs/gcnet/README.md)
-- [x] [Mixed Precision (FP16) Training](configs/fp16/README.md)
-- [x] [InstaBoost](configs/instaboost/README.md)
-- [x] [GRoIE](configs/groie/README.md)
-- [x] [DetectoRS](configs/detectors/README.md)
-- [x] [Generalized Focal Loss](configs/gfl/README.md)
-
-## Installation
-
-Please refer to [install.md](docs/install.md) for installation and dataset preparation.
-
-## Get Started
-
-### Oriented models training and testing
-
-If you want to train or test a oriented model, please refer to [oriented_model_starting.md](docs/oriented_model_starting.md).
-
-### How to use MMDetection
-
-If you are not familiar with MMdetection, please see [getting_started.md](docs/getting_started.md) for the basic usage of MMDetection. There are also tutorials for [finetuning models](docs/tutorials/finetune.md), [adding new dataset](docs/tutorials/new_dataset.md), [designing data pipeline](docs/tutorials/data_pipeline.md), and [adding new modules](docs/tutorials/new_modules.md).
-
-## Acknowledgement
-
-We refered [S2ANet](https://github.com/csuhan/s2anet) and [AerialDetection](https://github.com/dingjiansw101/AerialDetection) when develping OBBDetection.
-
-This toolbox is modified from [MMdetection](https://github.com/open-mmlab/mmdetection). If you use this toolbox or benchmark in your research, please cite the following information.
-
-```
-@article{mmdetection,
-  title   = {{MMDetection}: Open MMLab Detection Toolbox and Benchmark},
-  author  = {Chen, Kai and Wang, Jiaqi and Pang, Jiangmiao and Cao, Yuhang and
-             Xiong, Yu and Li, Xiaoxiao and Sun, Shuyang and Feng, Wansen and
-             Liu, Ziwei and Xu, Jiarui and Zhang, Zheng and Cheng, Dazhi and
-             Zhu, Chenchen and Cheng, Tianheng and Zhao, Qijie and Li, Buyu and
-             Lu, Xin and Zhu, Rui and Wu, Yue and Dai, Jifeng and Wang, Jingdong
-             and Shi, Jianping and Ouyang, Wanli and Loy, Chen Change and Lin, Dahua},
-  journal = {arXiv preprint arXiv:1906.07155},
-  year={2019}
-}
-```
-
-This is the official implement of [Oriented R-CNN](configs/obb/oriented_rcnn). if it is used in your research, please cite the following information.
-
-```
-@InProceedings{Xie_2021_ICCV,
-  author = {Xie, Xingxing and Cheng, Gong and Wang, Jiabao and Yao, Xiwen and Han, Junwei},
-  title = {Oriented R-CNN for Object Detection},
-  booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
-  month = {October},
-  year = {2021},
-  pages = {3520-3529} }
-```
-# heat012
-# heat013
+* [MMCV](https://github.com/open-mmlab/mmcv): OpenMMLab foundational library for computer vision.
+* [MIM](https://github.com/open-mmlab/mim): MIM installs OpenMMLab packages.
+* [MMClassification](https://github.com/open-mmlab/mmclassification): OpenMMLab image classification toolbox and benchmark.
+* [MMDetection](https://github.com/open-mmlab/mmdetection): OpenMMLab detection toolbox and benchmark.
+* [MMDetection3D](https://github.com/open-mmlab/mmdetection3d): OpenMMLab's next-generation platform for general 3D object detection.
+* [MMRotate](https://github.com/open-mmlab/mmrotate): OpenMMLab rotated object detection toolbox and benchmark.
+* [MMSegmentation](https://github.com/open-mmlab/mmsegmentation): OpenMMLab semantic segmentation toolbox and benchmark.
+* [MMOCR](https://github.com/open-mmlab/mmocr): OpenMMLab text detection, recognition, and understanding toolbox.
+* [MMPose](https://github.com/open-mmlab/mmpose): OpenMMLab pose estimation toolbox and benchmark.
+* [MMHuman3D](https://github.com/open-mmlab/mmhuman3d): OpenMMLab 3D human parametric model toolbox and benchmark.
+* [MMSelfSup](https://github.com/open-mmlab/mmselfsup): OpenMMLab self-supervised learning toolbox and benchmark.
+* [MMRazor](https://github.com/open-mmlab/mmrazor): OpenMMLab model compression toolbox and benchmark.
+* [MMFewShot](https://github.com/open-mmlab/mmfewshot): OpenMMLab fewshot learning toolbox and benchmark.
+* [MMAction2](https://github.com/open-mmlab/mmaction2): OpenMMLab's next-generation action understanding toolbox and benchmark.
+* [MMTracking](https://github.com/open-mmlab/mmtracking): OpenMMLab video perception toolbox and benchmark.
+* [MMFlow](https://github.com/open-mmlab/mmflow): OpenMMLab optical flow toolbox and benchmark.
+* [MMEditing](https://github.com/open-mmlab/mmediting): OpenMMLab image and video editing toolbox.
+* [MMGeneration](https://github.com/open-mmlab/mmgeneration): OpenMMLab image and video generative models toolbox.
+* [MMDeploy](https://github.com/open-mmlab/mmdeploy): OpenMMLab model deployment framework.
+# myrotate

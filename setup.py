@@ -1,119 +1,31 @@
-#!/usr/bin/env python
 import os
-import subprocess
-import time
+import os.path as osp
+import shutil
+import sys
+import warnings
 from setuptools import find_packages, setup
-
 import torch
+
 from torch.utils.cpp_extension import (BuildExtension, CppExtension,
                                        CUDAExtension)
 
-
 def readme():
+    """Load README.md."""
     with open('README.md', encoding='utf-8') as f:
         content = f.read()
     return content
 
 
-version_file = 'mmdet/version.py'
-
-
-def get_git_hash():
-
-    def _minimal_ext_cmd(cmd):
-        # construct minimal environment
-        env = {}
-        for k in ['SYSTEMROOT', 'PATH', 'HOME']:
-            v = os.environ.get(k)
-            if v is not None:
-                env[k] = v
-        # LANGUAGE is used on win32
-        env['LANGUAGE'] = 'C'
-        env['LANG'] = 'C'
-        env['LC_ALL'] = 'C'
-        out = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, env=env).communicate()[0]
-        return out
-
-    try:
-        out = _minimal_ext_cmd(['git', 'rev-parse', 'HEAD'])
-        sha = out.strip().decode('ascii')
-    except OSError:
-        sha = 'unknown'
-
-    return sha
-
-
-def get_hash():
-    if os.path.exists('.git'):
-        sha = get_git_hash()[:7]
-    elif os.path.exists(version_file):
-        try:
-            from mmdet.version import __version__
-            sha = __version__.split('+')[-1]
-        except ImportError:
-            raise ImportError('Unable to get git version')
-    else:
-        sha = 'unknown'
-
-    return sha
-
-
-def write_version_py():
-    content = """# GENERATED VERSION FILE
-# TIME: {}
-
-__version__ = '{}'
-short_version = '{}'
-version_info = ({})
-"""
-    sha = get_hash()
-    with open('mmdet/VERSION', 'r') as f:
-        SHORT_VERSION = f.read().strip()
-    VERSION_INFO = ', '.join(SHORT_VERSION.split('.'))
-    VERSION = SHORT_VERSION + '+' + sha
-
-    version_file_str = content.format(time.asctime(), VERSION, SHORT_VERSION,
-                                      VERSION_INFO)
-    with open(version_file, 'w') as f:
-        f.write(version_file_str)
-
-
 def get_version():
+    """Get version of mmrotate."""
+    version_file = 'mmrotate/version.py'
     with open(version_file, 'r') as f:
         exec(compile(f.read(), version_file, 'exec'))
     return locals()['__version__']
 
 
-def make_cuda_ext(name, module, sources, sources_cuda=[]):
-
-    define_macros = []
-    extra_compile_args = {'cxx': []}
-
-    if torch.cuda.is_available() or os.getenv('FORCE_CUDA', '0') == '1':
-        define_macros += [('WITH_CUDA', None)]
-        extension = CUDAExtension
-        extra_compile_args['nvcc'] = [
-            '-D__CUDA_NO_HALF_OPERATORS__',
-            '-D__CUDA_NO_HALF_CONVERSIONS__',
-            '-D__CUDA_NO_HALF2_OPERATORS__',
-        ]
-        sources += sources_cuda
-    else:
-        print(f'Compiling {name} without CUDA')
-        extension = CppExtension
-        # raise EnvironmentError('CUDA is required to compile MMDetection!')
-
-    return extension(
-        name=f'{module}.{name}',
-        sources=[os.path.join(*module.split('.'), p) for p in sources],
-        define_macros=define_macros,
-        extra_compile_args=extra_compile_args)
-
-
 def parse_requirements(fname='requirements.txt', with_version=True):
-    """
-    Parse the package dependencies listed in a requirements file but strips
+    """Parse the package dependencies listed in a requirements file but strips
     specific versioning information.
 
     Args:
@@ -132,9 +44,7 @@ def parse_requirements(fname='requirements.txt', with_version=True):
     require_fpath = fname
 
     def parse_line(line):
-        """
-        Parse information from a line in a requirements text file
-        """
+        """Parse information from a line in a requirements text file."""
         if line.startswith('-r '):
             # Allow specifying requirements in other files
             target = line.split(' ')[1]
@@ -144,6 +54,8 @@ def parse_requirements(fname='requirements.txt', with_version=True):
             info = {'line': line}
             if line.startswith('-e '):
                 info['package'] = line.split('#egg=')[1]
+            elif '@git+' in line:
+                info['package'] = line
             else:
                 # Remove versioning from the package
                 pat = '(' + '|'.join(['>=', '==', '>']) + ')'
@@ -190,31 +102,118 @@ def parse_requirements(fname='requirements.txt', with_version=True):
     return packages
 
 
+def add_mim_extension():
+    """Add extra files that are required to support MIM into the package.
+
+    These files will be added by creating a symlink to the originals if the
+    package is installed in `editable` mode (e.g. pip install -e .), or by
+    copying from the originals otherwise.
+    """
+
+    # parse installment mode
+    if 'develop' in sys.argv:
+        # installed by `pip install -e .`
+        mode = 'symlink'
+    elif 'sdist' in sys.argv or 'bdist_wheel' in sys.argv:
+        # installed by `pip install .`
+        # or create source distribution by `python setup.py sdist`
+        mode = 'copy'
+    else:
+        return
+
+    filenames = ['tools', 'configs', 'demo', 'model-index.yml']
+    repo_path = osp.dirname(__file__)
+    mim_path = osp.join(repo_path, 'mmrotate', '.mim')
+    os.makedirs(mim_path, exist_ok=True)
+
+    for filename in filenames:
+        if osp.exists(filename):
+            src_path = osp.join(repo_path, filename)
+            tar_path = osp.join(mim_path, filename)
+
+            if osp.isfile(tar_path) or osp.islink(tar_path):
+                os.remove(tar_path)
+            elif osp.isdir(tar_path):
+                shutil.rmtree(tar_path)
+
+            if mode == 'symlink':
+                src_relpath = osp.relpath(src_path, osp.dirname(tar_path))
+                try:
+                    os.symlink(src_relpath, tar_path)
+                except OSError:
+                    # Creating a symbolic link on windows may raise an
+                    # `OSError: [WinError 1314]` due to privilege. If
+                    # the error happens, the src file will be copied
+                    mode = 'copy'
+                    warnings.warn(
+                        f'Failed to create a symbolic link for {src_relpath}, '
+                        f'and it will be copied to {tar_path}')
+                else:
+                    continue
+
+            if mode == 'copy':
+                if osp.isfile(src_path):
+                    shutil.copyfile(src_path, tar_path)
+                elif osp.isdir(src_path):
+                    shutil.copytree(src_path, tar_path)
+                else:
+                    warnings.warn(f'Cannot copy file {src_path}.')
+            else:
+                raise ValueError(f'Invalid mode {mode}')
+
+
+
+def make_cuda_ext(name, module, sources, sources_cuda=[]):
+
+    define_macros = []
+    extra_compile_args = {'cxx': []}
+
+    if torch.cuda.is_available() or os.getenv('FORCE_CUDA', '0') == '1':
+        define_macros += [('WITH_CUDA', None)]
+        extension = CUDAExtension
+        extra_compile_args['nvcc'] = [
+            '-D__CUDA_NO_HALF_OPERATORS__',
+            '-D__CUDA_NO_HALF_CONVERSIONS__',
+            '-D__CUDA_NO_HALF2_OPERATORS__',
+        ]
+        sources += sources_cuda
+    else:
+        print(f'Compiling {name} without CUDA')
+        extension = CppExtension
+        # raise EnvironmentError('CUDA is required to compile MMDetection!')
+
+    return extension(
+        name=f'{module}.{name}',
+        sources=[os.path.join(*module.split('.'), p) for p in sources],
+        define_macros=define_macros,
+        extra_compile_args=extra_compile_args)
+
+
 if __name__ == '__main__':
-    write_version_py()
+    add_mim_extension()
     setup(
-        name='mmdet',
+        name='mmrotate',
         version=get_version(),
-        description='Open MMLab Detection Toolbox and Benchmark',
+        description='Rotation Detection Toolbox and Benchmark',
         long_description=readme(),
-        author='OpenMMLab',
-        author_email='chenkaidev@gmail.com',
-        keywords='computer vision, object detection',
-        url='https://github.com/open-mmlab/mmdetection',
+        long_description_content_type='text/markdown',
+        author='MMRotate Authors',
+        author_email='openmmlab@gmail.com',
+        keywords='computer vision, object detection, rotation detection',
+        url='https://github.com/open-mmlab/mmrotate',
         packages=find_packages(exclude=('configs', 'tools', 'demo')),
-        package_data={'mmdet.ops': ['*/*.so']},
+        include_package_data=True,
         classifiers=[
             'Development Status :: 4 - Beta',
             'License :: OSI Approved :: Apache Software License',
             'Operating System :: OS Independent',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.5',
             'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
+            'Programming Language :: Python :: 3.8',
+            'Programming Language :: Python :: 3.9',
         ],
         license='Apache License 2.0',
-        setup_requires=parse_requirements('requirements/build.txt'),
-        tests_require=parse_requirements('requirements/tests.txt'),
         install_requires=parse_requirements('requirements/runtime.txt'),
         extras_require={
             'all': parse_requirements('requirements.txt'),
@@ -224,79 +223,6 @@ if __name__ == '__main__':
         },
         ext_modules=[
             make_cuda_ext(
-                name='compiling_info',
-                module='mmdet.ops.utils',
-                sources=['src/compiling_info.cpp']),
-            make_cuda_ext(
-                name='nms_ext',
-                module='mmdet.ops.nms',
-                sources=['src/nms_ext.cpp', 'src/cpu/nms_cpu.cpp'],
-                sources_cuda=[
-                    'src/cuda/nms_cuda.cpp', 'src/cuda/nms_kernel.cu'
-                ]),
-            make_cuda_ext(
-                name='roi_align_ext',
-                module='mmdet.ops.roi_align',
-                sources=[
-                    'src/roi_align_ext.cpp',
-                    'src/cpu/roi_align_v2.cpp',
-                ],
-                sources_cuda=[
-                    'src/cuda/roi_align_kernel.cu',
-                    'src/cuda/roi_align_kernel_v2.cu'
-                ]),
-            make_cuda_ext(
-                name='roi_pool_ext',
-                module='mmdet.ops.roi_pool',
-                sources=['src/roi_pool_ext.cpp'],
-                sources_cuda=['src/cuda/roi_pool_kernel.cu']),
-            make_cuda_ext(
-                name='sigmoid_focal_loss_ext',
-                module='mmdet.ops.sigmoid_focal_loss',
-                sources=['src/sigmoid_focal_loss_ext.cpp'],
-                sources_cuda=['src/cuda/sigmoid_focal_loss_cuda.cu']),
-            make_cuda_ext(
-                name='masked_conv2d_ext',
-                module='mmdet.ops.masked_conv',
-                sources=['src/masked_conv2d_ext.cpp'],
-                sources_cuda=[
-                    'src/cuda/masked_conv2d_cuda.cpp',
-                    'src/cuda/masked_conv2d_kernel.cu'
-                ]),
-            make_cuda_ext(
-                name='corner_pool_ext',
-                module='mmdet.ops.corner_pool',
-                sources=['src/corner_pool.cpp']),
-
-
-            make_cuda_ext(
-                name='roi_align_rotated_ext',
-                module='mmdet.ops.roi_align_rotated',
-                sources=[
-                    'src/roi_align_rotated_cpu.cpp',
-                    'src/roi_align_rotated_ext.cpp'
-                ],
-                sources_cuda=['src/roi_align_rotated_cuda.cu']),
-            make_cuda_ext(
-                name='nms_rotated_ext',
-                module='mmdet.ops.nms_rotated',
-                sources=[
-                    'src/nms_rotated_cpu.cpp',
-                    'src/nms_rotated_ext.cpp'
-                ],
-                sources_cuda=[
-                    'src/nms_rotated_cuda.cu',
-                    'src/poly_nms_cuda.cu',
-                ]),
-            make_cuda_ext(
-                name='box_iou_rotated_ext',
-                module='mmdet.ops.box_iou_rotated',
-                sources=[
-                    'src/box_iou_rotated_cpu.cpp',
-                    'src/box_iou_rotated_ext.cpp'
-                ],
-                sources_cuda=['src/box_iou_rotated_cuda.cu']),
-            make_cuda_ext(
                 name='convex_ext',
                 module='mmdet.ops.convex',
                 sources=[
@@ -304,15 +230,6 @@ if __name__ == '__main__':
                     'src/convex_ext.cpp'
                 ],
                 sources_cuda=['src/convex_cuda.cu']),
-            make_cuda_ext(
-                name='orn_cuda',
-                module='mmdet.ops.orn',
-                sources=['src/vision.cpp',
-                         'src/cpu/ActiveRotatingFilter_cpu.cpp',
-                         'src/cpu/RotationInvariantEncoding_cpu.cpp',
-                         'src/cuda/ActiveRotatingFilter_cuda.cu',
-                         'src/cuda/RotationInvariantEncoding_cuda.cu',
-                         ]),
         ],
         cmdclass={'build_ext': BuildExtension},
         zip_safe=False)

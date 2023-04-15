@@ -1,3 +1,5 @@
+# Copyright (c) OpenMMLab. All rights reserved.
+import mmcv
 import numpy as np
 import torch
 
@@ -7,16 +9,16 @@ from .base_bbox_coder import BaseBBoxCoder
 
 @BBOX_CODERS.register_module()
 class LegacyDeltaXYWHBBoxCoder(BaseBBoxCoder):
-    """Legacy Delta XYWH BBox coder used in MMDet V1.x
+    """Legacy Delta XYWH BBox coder used in MMDet V1.x.
 
     Following the practice in R-CNN [1]_, this coder encodes bbox (x1, y1, x2,
     y2) into delta (dx, dy, dw, dh) and decodes delta (dx, dy, dw, dh)
     back to original bbox (x1, y1, x2, y2).
 
     Note:
-        The main difference between `LegacyDeltaXYWHBBoxCoder` and
-        `DeltaXYWHBBoxCoder` is whether ``+ 1`` is used during width and height
-        calculation. We suggest to only use this coder when testing with
+        The main difference between :class`LegacyDeltaXYWHBBoxCoder` and
+        :class:`DeltaXYWHBBoxCoder` is whether ``+ 1`` is used during width and
+        height calculation. We suggest to only use this coder when testing with
         MMDet V1.x models.
 
     References:
@@ -37,8 +39,8 @@ class LegacyDeltaXYWHBBoxCoder(BaseBBoxCoder):
         self.stds = target_stds
 
     def encode(self, bboxes, gt_bboxes):
-        """Get box regression transformation deltas that can be used
-        to transform the `bboxes` into the `gt_bboxes`.
+        """Get box regression transformation deltas that can be used to
+        transform the ``bboxes`` into the ``gt_bboxes``.
 
         Args:
             bboxes (torch.Tensor): source boxes, e.g., object proposals.
@@ -79,6 +81,7 @@ class LegacyDeltaXYWHBBoxCoder(BaseBBoxCoder):
         return decoded_bboxes
 
 
+@mmcv.jit(coderize=True)
 def legacy_bbox2delta(proposals,
                       gt,
                       means=(0., 0., 0., 0.),
@@ -99,7 +102,6 @@ def legacy_bbox2delta(proposals,
     Returns:
         Tensor: deltas with shape (N, 4), where columns represent dx, dy,
             dw, dh.
-
     """
     assert proposals.size() == gt.size()
 
@@ -128,6 +130,7 @@ def legacy_bbox2delta(proposals,
     return deltas
 
 
+@mmcv.jit(coderize=True)
 def legacy_delta2bbox(rois,
                       deltas,
                       means=(0., 0., 0., 0.),

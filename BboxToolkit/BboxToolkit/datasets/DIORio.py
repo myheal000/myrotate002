@@ -4,9 +4,11 @@ import os.path as osp
 import xml.etree.ElementTree as ET
 import numpy as np
 
+from PIL import Image
+from multiprocessing import Pool
 from functools import partial
-from .misc import get_classes, img_exts, prog_map
-from ..imagesize import imsize
+
+from .misc import get_classes, img_exts
 from ..transforms import bbox2type
 
 
@@ -33,8 +35,13 @@ def load_dior(img_dir, ann_dir=None, classes=None, xmltype='obb', nproc=10):
                          ann_dir=ann_dir,
                          cls2lbl=cls2lbl,
                          xmltype=xmltype)
-    img_list = os.listdir(img_dir)
-    contents = prog_map(_load_func, img_list, nproc)
+    if nproc > 1:
+        pool = Pool(nproc)
+        contents = pool.map(_load_func, os.listdir(img_dir))
+        pool.close()
+    else:
+        contents = list(map(_load_func, os.listdir(img_dir)))
+    contents = [c for c in contents if c is not None]
     end_time = time.time()
     print(f'Finishing loading DIOR {xmltype}, get {len(contents)} images,',
           f'using {end_time-start_time:.3f}s.')
@@ -54,8 +61,8 @@ def _load_dior_single(imgfile, img_dir, ann_dir, cls2lbl, xmltype):
 
     if not ('width' in content and 'height' in content):
         imgpath = osp.join(img_dir, imgfile)
-        width, height = imsize(imgpath)
-        content.update(dict(width=width, height=height))
+        size = Image.open(imgpath).size
+        content.update(dict(width=size[0], height=size[1]))
     content.update(dict(filename=imgfile, id=img_id))
     return content
 

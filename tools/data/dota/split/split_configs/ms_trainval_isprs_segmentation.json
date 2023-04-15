@@ -1,0 +1,27 @@
+{
+  "nproc": 10,
+  "img_dirs": [
+    "../landcover_segmentation/land_train_mask/"
+  ],
+  "sizes": [
+    512
+  ],
+  "gaps": [
+    256
+  ],
+  "rates": [
+    0.5,
+    1.0,
+    1.5
+  ],
+  "img_rate_thr": 0.6,
+  "iof_thr": 0.7,
+  "no_padding": false,
+  "padding_value": [
+    104,
+    116,
+    124
+  ],
+  "save_dir": "../landcover_segmentation/land_train_mask_split/",
+  "save_ext": ".png"
+}

@@ -1,12 +1,13 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from abc import ABCMeta, abstractmethod
 
-import torch.nn as nn
+from mmcv.runner import BaseModule
 
 from ..builder import build_shared_head
 
 
-class BaseRoIHead(nn.Module, metaclass=ABCMeta):
-    """Base class for RoIHeads"""
+class BaseRoIHead(BaseModule, metaclass=ABCMeta):
+    """Base class for RoIHeads."""
 
     def __init__(self,
                  bbox_roi_extractor=None,
@@ -15,11 +16,14 @@ class BaseRoIHead(nn.Module, metaclass=ABCMeta):
                  mask_head=None,
                  shared_head=None,
                  train_cfg=None,
-                 test_cfg=None):
-        super(BaseRoIHead, self).__init__()
+                 test_cfg=None,
+                 pretrained=None,
+                 init_cfg=None):
+        super(BaseRoIHead, self).__init__(init_cfg)
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
         if shared_head is not None:
+            shared_head.pretrained = pretrained
             self.shared_head = build_shared_head(shared_head)
 
         if bbox_head is not None:
@@ -46,16 +50,6 @@ class BaseRoIHead(nn.Module, metaclass=ABCMeta):
         return hasattr(self, 'shared_head') and self.shared_head is not None
 
     @abstractmethod
-    def init_weights(self, pretrained):
-        """Initialize the weights in head
-
-        Args:
-            pretrained (str, optional): Path to pre-trained weights.
-                Defaults to None.
-        """
-        pass
-
-    @abstractmethod
     def init_bbox_head(self):
         """Initialize ``bbox_head``"""
         pass
@@ -67,7 +61,7 @@ class BaseRoIHead(nn.Module, metaclass=ABCMeta):
 
     @abstractmethod
     def init_assigner_sampler(self):
-        """Initialize assigner and sampler"""
+        """Initialize assigner and sampler."""
         pass
 
     @abstractmethod
@@ -80,11 +74,16 @@ class BaseRoIHead(nn.Module, metaclass=ABCMeta):
                       gt_bboxes_ignore=None,
                       gt_masks=None,
                       **kwargs):
-        """Forward function during training"""
-        pass
+        """Forward function during training."""
 
-    async def async_simple_test(self, x, img_meta, **kwargs):
-        """Asynchronized test function"""
+    async def async_simple_test(self,
+                                x,
+                                proposal_list,
+                                img_metas,
+                                proposals=None,
+                                rescale=False,
+                                **kwargs):
+        """Asynchronized test function."""
         raise NotImplementedError
 
     def simple_test(self,
@@ -95,7 +94,6 @@ class BaseRoIHead(nn.Module, metaclass=ABCMeta):
                     rescale=False,
                     **kwargs):
         """Test without augmentation."""
-        pass
 
     def aug_test(self, x, proposal_list, img_metas, rescale=False, **kwargs):
         """Test with augmentations.
@@ -103,4 +101,3 @@ class BaseRoIHead(nn.Module, metaclass=ABCMeta):
         If rescale is False, then returned bboxes and masks will fit the scale
         of imgs[0].
         """
-        pass

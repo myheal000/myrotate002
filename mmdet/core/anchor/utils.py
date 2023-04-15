@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import torch
 
 
@@ -21,7 +22,7 @@ def anchor_inside_flags(flat_anchors,
                         valid_flags,
                         img_shape,
                         allowed_border=0):
-    """Check whether the anchors are inside the border
+    """Check whether the anchors are inside the border.
 
     Args:
         flat_anchors (torch.Tensor): Flatten anchors, shape (n, 4).
@@ -31,7 +32,7 @@ def anchor_inside_flags(flat_anchors,
             Defaults to 0.
 
     Returns:
-        torch.Tensor: Flags indicating whether the anchors are inside a
+        torch.Tensor: Flags indicating whether the anchors are inside a \
             valid range.
     """
     img_h, img_w = img_shape[:2]

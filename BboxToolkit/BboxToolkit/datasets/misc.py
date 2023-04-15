@@ -2,13 +2,12 @@ import itertools
 import os.path as osp
 import numpy as np
 
-from tqdm import tqdm
-from multiprocessing import Pool
-from ..imagesize import imsize
+from PIL import Image
 
 
 def product(*inputs):
     return [''.join(e) for e in itertools.product(*inputs)]
+
 
 dataset_classes = {
     'DOTA1_0': ('large-vehicle', 'swimming-pool', 'helicopter', 'bridge',
@@ -30,19 +29,27 @@ dataset_classes = {
              'dam', 'golffield', 'groundtrackfield', 'harbor', 'overpass', 'ship',
              'stadium', 'storagetank', 'tenniscourt', 'trainstation', 'vehicle',
              'windmill'),
-    'HRSC': ('ship', ),
+    'HRSC': ('ship',),
     'HRSC_cls': ('01', '02', '03', '04', '05', '06', '07', '08', '09', '10',
                  '11', '12', '13', '14', '15', '16', '17', '18', '19', '20',
                  '21', '22', '23', '24', '25', '26', '27', '28', '29', '30',
                  '31', '32', '33'),
-    'MSRA_TD500': ('text', ),
-    'HUST_TR400': ('text', ),
-    'RCTW_17': ('text', ),
-    'SynthText': ('text', ),
-    'ICDAR2015': ('text', ),
+    'MSRA_TD500': ('text',),
+    'RCTW_17': ('text',),
     'VOC': ('person', 'bird', 'cat', 'cow', 'dog', 'horse', 'sheep', 'aeroplane',
             'bicycle', 'boat', 'bus', 'car', 'motorbike', 'train', 'bottle',
             'chair', 'diningtable', 'pottedplant', 'sofa', 'tvmonitor'),
+    'TZB': ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'),
+    'ISPRS': ('Passenger Ship', 'Motorboat', 'Fishing Boat', 'Tugboat', 'other-ship',
+              'Engineering Ship', 'Liquid Cargo Ship', 'Dry Cargo Ship', 'Warship',
+              'Small Car', 'Bus', 'Cargo Truck', 'Dump Truck', 'other-vehicle',
+              'Van', 'Trailer', 'Tractor', 'Excavator', 'Truck Tractor',
+              'Boeing737', 'Boeing747', 'Boeing777', 'Boeing787', 'ARJ21',
+              'C919', 'A220', 'A321', 'A330', 'A350', 'other-airplane',
+              'Baseball Field', 'Basketball Court', 'Football Field', 'Tennis Court',
+              'Roundabout', 'Intersection', 'Bridge'),
+    'ISPRS_airplane': ('Boeing737', 'Boeing747', 'Boeing777', 'Boeing787', 'ARJ21',
+                       'C919', 'A220', 'A321', 'A330', 'A350', 'other-airplane'),
 }
 
 dataset_aliases = {
@@ -53,11 +60,11 @@ dataset_aliases = {
     'HRSC': product(['hrsc', 'HRSC'], ['', '2016']),
     'HRSC_cls': product(['hrsc', 'HRSC'], ['_cls', '2016_cls']),
     'MSRA_TD500': ['msra_td500', 'MSRA_TD500', 'msra-td500', 'MSRA-TD500'],
-    'HUST_TR400': ['hust_tr500', 'HUST_TR400', 'hust-tr400', 'HUST-TR400'],
     'RCTW_17': ['rctw_17', 'RCTW_17', 'rctw-17', 'RCTW-17'],
-    'SynthText': ['synthtext', 'SynthText'],
-    'ICDAR2015': ['ICDAR2015', 'icdar2015'],
     'VOC': ['VOC', 'voc'],
+    'TZB': ['TZB', 'tzb'],
+    'ISPRS': ['ISPRS', 'isprs'],
+    'ISPRS_airplane': ['ISPRS_airplane', 'isprs_airplane', 'ISPRS_AIRPLANE', 'isprs_AIRPLANE'],
 }
 
 img_exts = ['.jpg', '.JPG', '.png', '.tif', '.bmp']
@@ -69,8 +76,8 @@ def read_img_info(imgpath):
     if ext not in img_exts:
         return None
 
-    width, height = imsize(imgpath)
-    content = dict(width=width, height=height, filename=imgfile, id=img_id)
+    size = Image.open(imgpath).size
+    content = dict(width=size[0], height=size[1], filename=imgfile, id=img_id)
     return content
 
 
@@ -153,12 +160,12 @@ def merge_prior_contents(bases, priors, merge_type='addition'):
                 for key in prior_anns:
                     if isinstance(base_anns[key], np.ndarray):
                         base_anns[key] = prior_anns[key] if merge_type == 'replace' \
-                                else np.concatenate([base_anns[key], prior_anns[key]], axis=0)
+                            else np.concatenate([base_anns[key], prior_anns[key]], axis=0)
                     elif isinstance(base_anns[key], list):
                         base_anns[key] = prior_anns[key] if merge_type == 'replace' \
-                                else base_anns[key].update(prior_anns[key])
+                            else base_anns[key].update(prior_anns[key])
                     else:
-                        raise TypeError("annotations only support np.ndarrya and list"+
+                        raise TypeError("annotations only support np.ndarrya and list" +
                                         f", but get {type(base_anns[key])}")
 
 
@@ -179,39 +186,6 @@ def split_imgset(contents, imgset):
 
         imgset_contents.append(contents[id_mapper[img_id]])
     return imgset_contents
-
-
-def nproc_map(func, tasks, nproc):
-    if nproc > 1:
-        pool = Pool(nproc)
-        iterator = pool.imap(func, tasks)
-    else:
-        iterator = map(func, tasks)
-
-    contents = [c for c in iterator if c is not None]
-
-    if nproc > 1:
-        pool.close()
-    return contents
-
-
-def prog_map(func, tasks, nproc):
-    if nproc > 1:
-        pool = Pool(nproc)
-        iterator = pool.imap(func, tasks)
-    else:
-        iterator = map(func, tasks)
-
-    contents = []
-    with tqdm(total=len(tasks)) as pbar:
-        for content in iterator:
-            pbar.update()
-            if content is not None:
-                contents.append(content)
-
-    if nproc > 1:
-        pool.close()
-    return contents
 
 
 class _ConstMapper:

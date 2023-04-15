@@ -1,5 +1,5 @@
 {
-    "nproc": 20,
+    "nproc": 10,
     "load_type": "dota",
     "img_dirs": [
         "data/DOTA1_5/test/images/"

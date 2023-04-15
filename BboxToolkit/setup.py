@@ -9,7 +9,6 @@ setup(name='BboxToolkit',
           'matplotlib>=3.4',
           'opencv-python',
           'terminaltables',
+          'pillow',
           'shapely',
-          'tqdm',
-          'scipy',
           'numpy'])

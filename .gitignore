@@ -38,6 +38,7 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
+.nox/
 .coverage
 .coverage.*
 .cache
@@ -46,6 +47,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+.idea/*
 
 # Translations
 *.mo
@@ -64,13 +66,19 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+docs/en/_build/
+docs/zh_cn/_build/
+# src
 
 # PyBuilder
 target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
 
 # pyenv
 .python-version
@@ -102,23 +110,15 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+.dmypy.json
+dmypy.json
 
-mmdet/version.py
-data/
-.vscode
-.idea
+# Pyre type checker
+.pyre/
 .DS_Store
-
-# custom
-*.pkl
-*.pkl.json
-*.log.json
-work_dirs/
-
-# Pytorch
+.idea
+*work_dirs*
+tmp
 *.pth
-*.py~
-*.sh~
-
-# vim
-*.swp
+# custom
+mmrotate/.mim

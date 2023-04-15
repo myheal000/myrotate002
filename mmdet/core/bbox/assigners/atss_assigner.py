@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import torch
 
 from ..builder import BBOX_ASSIGNERS
@@ -20,9 +21,13 @@ class ATSSAssigner(BaseAssigner):
         topk (float): number of bbox selected in each level
     """
 
-    def __init__(self, topk, iou_calculator=dict(type='BboxOverlaps2D')):
+    def __init__(self,
+                 topk,
+                 iou_calculator=dict(type='BboxOverlaps2D'),
+                 ignore_iof_thr=-1):
         self.topk = topk
         self.iou_calculator = build_iou_calculator(iou_calculator)
+        self.ignore_iof_thr = ignore_iof_thr
 
     # https://github.com/sfzhang15/ATSS/blob/master/atss_core/modeling/rpn/atss/loss.py
 
@@ -44,7 +49,7 @@ class ATSSAssigner(BaseAssigner):
         4. get corresponding iou for the these candidates, and compute the
            mean and std, set mean + std as the iou threshold
         5. select these candidates whose iou are greater than or equal to
-           the threshold as postive
+           the threshold as positive
         6. limit the positive sample's center in gt
 
 
@@ -98,6 +103,15 @@ class ATSSAssigner(BaseAssigner):
         distances = (bboxes_points[:, None, :] -
                      gt_points[None, :, :]).pow(2).sum(-1).sqrt()
 
+        if (self.ignore_iof_thr > 0 and gt_bboxes_ignore is not None
+                and gt_bboxes_ignore.numel() > 0 and bboxes.numel() > 0):
+            ignore_overlaps = self.iou_calculator(
+                bboxes, gt_bboxes_ignore, mode='iof')
+            ignore_max_overlaps, _ = ignore_overlaps.max(dim=1)
+            ignore_idxs = ignore_max_overlaps > self.ignore_iof_thr
+            distances[ignore_idxs, :] = INF
+            assigned_gt_inds[ignore_idxs] = -1
+
         # Selecting candidates based on the center distance
         candidate_idxs = []
         start_idx = 0
@@ -106,8 +120,9 @@ class ATSSAssigner(BaseAssigner):
             # select k bbox whose center are closest to the gt center
             end_idx = start_idx + bboxes_per_level
             distances_per_level = distances[start_idx:end_idx, :]
+            selectable_k = min(self.topk, bboxes_per_level)
             _, topk_idxs_per_level = distances_per_level.topk(
-                self.topk, dim=0, largest=False)
+                selectable_k, dim=0, largest=False)
             candidate_idxs.append(topk_idxs_per_level + start_idx)
             start_idx = end_idx
         candidate_idxs = torch.cat(candidate_idxs, dim=0)

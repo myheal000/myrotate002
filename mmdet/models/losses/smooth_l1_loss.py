@@ -1,3 +1,5 @@
+# Copyright (c) OpenMMLab. All rights reserved.
+import mmcv
 import torch
 import torch.nn as nn
 
@@ -5,9 +7,10 @@ from ..builder import LOSSES
 from .utils import weighted_loss
 
 
+@mmcv.jit(derivate=True, coderize=True)
 @weighted_loss
 def smooth_l1_loss(pred, target, beta=1.0):
-    """Smooth L1 loss
+    """Smooth L1 loss.
 
     Args:
         pred (torch.Tensor): The prediction.
@@ -19,16 +22,20 @@ def smooth_l1_loss(pred, target, beta=1.0):
         torch.Tensor: Calculated loss
     """
     assert beta > 0
-    assert pred.size() == target.size() and target.numel() > 0
+    if target.numel() == 0:
+        return pred.sum() * 0
+
+    assert pred.size() == target.size()
     diff = torch.abs(pred - target)
     loss = torch.where(diff < beta, 0.5 * diff * diff / beta,
                        diff - 0.5 * beta)
     return loss
 
 
+@mmcv.jit(derivate=True, coderize=True)
 @weighted_loss
 def l1_loss(pred, target):
-    """L1 loss
+    """L1 loss.
 
     Args:
         pred (torch.Tensor): The prediction.
@@ -37,14 +44,17 @@ def l1_loss(pred, target):
     Returns:
         torch.Tensor: Calculated loss
     """
-    assert pred.size() == target.size() and target.numel() > 0
+    if target.numel() == 0:
+        return pred.sum() * 0
+
+    assert pred.size() == target.size()
     loss = torch.abs(pred - target)
     return loss
 
 
 @LOSSES.register_module()
 class SmoothL1Loss(nn.Module):
-    """Smooth L1 loss
+    """Smooth L1 loss.
 
     Args:
         beta (float, optional): The threshold in the piecewise function.
@@ -67,7 +77,7 @@ class SmoothL1Loss(nn.Module):
                 avg_factor=None,
                 reduction_override=None,
                 **kwargs):
-        """Forward function
+        """Forward function.
 
         Args:
             pred (torch.Tensor): The prediction.
@@ -96,7 +106,7 @@ class SmoothL1Loss(nn.Module):
 
 @LOSSES.register_module()
 class L1Loss(nn.Module):
-    """L1 loss
+    """L1 loss.
 
     Args:
         reduction (str, optional): The method to reduce the loss.
@@ -115,7 +125,7 @@ class L1Loss(nn.Module):
                 weight=None,
                 avg_factor=None,
                 reduction_override=None):
-        """Forward function
+        """Forward function.
 
         Args:
             pred (torch.Tensor): The prediction.

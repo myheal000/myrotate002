@@ -1,27 +1,29 @@
-from .auto_augment import AutoAugment
+# Copyright (c) OpenMMLab. All rights reserved.
+from .auto_augment import (AutoAugment, BrightnessTransform, ColorTransform,
+                           ContrastTransform, EqualizeTransform, Rotate, Shear,
+                           Translate)
 from .compose import Compose
-from .formating import (Collect, ImageToTensor, ToDataContainer, ToTensor,
-                        Transpose, to_tensor)
+from .formatting import (Collect, DefaultFormatBundle, ImageToTensor,
+                         ToDataContainer, ToTensor, Transpose, to_tensor)
 from .instaboost import InstaBoost
-from .loading import (LoadAnnotations, LoadImageFromFile,
-                      LoadMultiChannelImageFromFiles, LoadProposals)
+from .loading import (LoadAnnotations, LoadImageFromFile, LoadImageFromWebcam,
+                      LoadMultiChannelImageFromFiles, LoadPanopticAnnotations,
+                      LoadProposals)
 from .test_time_aug import MultiScaleFlipAug
-from .transforms import (Albu, Expand, MinIoURandomCrop, Normalize, Pad,
-                         PhotoMetricDistortion, RandomCenterCropPad,
-                         RandomCrop, RandomFlip, Resize, SegRescale)
-
-from .obb.base import (LoadOBBAnnotations, Mask2OBB, OBBDefaultFormatBundle,
-                       OBBRandomFlip, RandomOBBRotate, MultiScaleFlipRotateAug,
-                       FliterEmpty)
-from .obb.dota import LoadDOTASpecialInfo, DOTASpecialIgnore
+from .transforms import (Albu, CutOut, Expand, MinIoURandomCrop, MixUp, Mosaic,
+                         Normalize, Pad, PhotoMetricDistortion, RandomAffine,
+                         RandomCenterCropPad, RandomCrop, RandomFlip,
+                         RandomShift, Resize, SegRescale, YOLOXHSVRandomAug)
 
 __all__ = [
     'Compose', 'to_tensor', 'ToTensor', 'ImageToTensor', 'ToDataContainer',
-    'Transpose', 'Collect', 'LoadAnnotations', 'LoadImageFromFile',
+    'Transpose', 'Collect', 'DefaultFormatBundle', 'LoadAnnotations',
+    'LoadImageFromFile', 'LoadImageFromWebcam', 'LoadPanopticAnnotations',
     'LoadMultiChannelImageFromFiles', 'LoadProposals', 'MultiScaleFlipAug',
     'Resize', 'RandomFlip', 'Pad', 'RandomCrop', 'Normalize', 'SegRescale',
     'MinIoURandomCrop', 'Expand', 'PhotoMetricDistortion', 'Albu',
-    'InstaBoost', 'RandomCenterCropPad', 'AutoAugment',
-    'LoadOBBAnnotations', 'Mask2OBB', 'OBBDefaultFormatBundle', 'OBBRandomFlip',
-    'RandomOBBRotate', 'LoadDOTASpecialInfo', 'DOTASpecialIgnore', 'FliterEmpty'
+    'InstaBoost', 'RandomCenterCropPad', 'AutoAugment', 'CutOut', 'Shear',
+    'Rotate', 'ColorTransform', 'EqualizeTransform', 'BrightnessTransform',
+    'ContrastTransform', 'Translate', 'RandomShift', 'Mosaic', 'MixUp',
+    'RandomAffine', 'YOLOXHSVRandomAug'
 ]

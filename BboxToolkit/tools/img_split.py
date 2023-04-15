@@ -15,14 +15,12 @@ from math import ceil
 from functools import partial, reduce
 from multiprocessing import Pool, Manager
 
-cv2.setNumThreads(1)
-
 
 def add_parser(parser):
     #argument for processing
-    parser.add_argument('--base_json', type=str, default=None,
+    parser.add_argument('--base_json', type=str, default='split_configs/ISPRS/3s_trainval.json',
                         help='json config file for split images')
-    parser.add_argument('--nproc', type=int, default=20,
+    parser.add_argument('--nproc', type=int, default=10,
                         help='the procession number')
 
     #argument for loading data
@@ -91,6 +89,7 @@ def parse_args():
             args = parser.parse_args()
 
     # assert arguments
+
     assert args.load_type is not None, "argument load_type can't be None"
     assert args.img_dirs is not None, "argument img_dirs can't be None"
     args.img_dirs = abspath(args.img_dirs)
@@ -270,7 +269,8 @@ def main():
         sizes += [int(size / rate) for size in args.sizes]
         gaps += [int(gap / rate) for gap in args.gaps]
     save_imgs = osp.join(args.save_dir, 'images')
-    save_files = osp.join(args.save_dir, 'annfiles')
+    save_files = osp.join(args.save_dir, 'annfiles_pkl')
+
     os.makedirs(save_imgs)
     os.makedirs(save_files)
     logger = setup_logger(save_files)
@@ -278,7 +278,9 @@ def main():
     print('Loading original data!!!')
     infos, img_dirs = [], []
     load_func = getattr(bt.datasets, 'load_'+args.load_type)
+
     for img_dir, ann_dir in zip(args.img_dirs, args.ann_dirs):
+        print(img_dir)
         _infos, classes = load_func(
             img_dir=img_dir,
             ann_dir=ann_dir,
@@ -318,16 +320,15 @@ def main():
 
     patch_infos = reduce(lambda x, y: x+y, patch_infos)
     stop = time.time()
-    logger.info(f'Finish splitting images in {int(stop - start)} second!!!')
-    logger.info(f'Total images number: {len(patch_infos)}')
+    print(f'Finish splitting images in {int(stop - start)} second!!!')
+    print(f'Total images number: {len(patch_infos)}')
 
     print('Save information of splitted dataset!!!')
     arg_dict = vars(args)
     arg_dict.pop('base_json', None)
     with open(osp.join(save_files, 'split_config.json'), 'w') as f:
         json.dump(arg_dict, f, indent=4)
-        json_str = json.dumps(arg_dict, indent=4)
-        logger.info(json_str)
+    
     bt.save_pkl(osp.join(save_files, 'ori_annfile.pkl'), infos, classes)
     bt.save_pkl(osp.join(save_files, 'patch_annfile.pkl'), patch_infos, classes)
 
