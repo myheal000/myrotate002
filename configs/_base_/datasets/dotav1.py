@@ -1,6 +1,7 @@
 # dataset settings
+# dataset settings
 dataset_type = 'DOTADataset'
-data_root = '/kaggle/input/dota-v10/split_ss_dota1_0'
+data_root = '/kaggle/input/dota-v10/split_ss_dota1_0/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
@@ -27,7 +28,6 @@ test_pipeline = [
             dict(type='Collect', keys=['img'])
         ])
 ]
-
 data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
@@ -44,6 +44,5 @@ data = dict(
     test=dict(
         type=dataset_type,
         ann_file=data_root + 'test/images/',
-        img_prefix=data_root + 'test/images/',
-        pipeline=test_pipeline)
-        )
+        img_prefix=data_root + 'test/annfiles/',
+        pipeline=test_pipeline))

@@ -23,6 +23,6 @@
     116,
     124
   ],
-  "save_dir": "data/split_ss_dota/train/",
+  "save_dir": "/kaggle/input/split_ss_dota/train/",
   "save_ext": ".png"
 }
